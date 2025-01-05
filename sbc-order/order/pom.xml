@@ -10,7 +10,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.crossoverJie</groupId>
     <artifactId>order</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <description>订单服务</description>
@@ -41,7 +40,7 @@
         <!--防重插件-->
         <dependency>
             <groupId>com.crossoverJie.request.check</groupId>
-            <artifactId>request-check</artifactId>
+            <artifactId>sbc-request-check</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
 

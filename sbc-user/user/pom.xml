@@ -10,7 +10,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.crossoverJie</groupId>
     <artifactId>user</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <description>用户服务</description>
