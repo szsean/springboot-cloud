@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * Function:切面
  *
  * @author crossoverJie
- *         Date: 2017/7/31 20:07
+ * Date: 2017/7/31 20:07
  * @since JDK 1.8
  */
 //切面注解
@@ -34,22 +34,26 @@ import java.util.concurrent.TimeUnit;
 //开启cglib代理
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class ReqNoDrcAspect {
-    private static Logger logger = LoggerFactory.getLogger(ReqNoDrcAspect.class);
+    private static final Logger logger = LoggerFactory.getLogger(ReqNoDrcAspect.class);
+
+    private CheckReqProperties properties;
 
     @Autowired
-    private CheckReqProperties properties ;
+    public void setProperties(CheckReqProperties properties) {
+        this.properties = properties;
+    }
 
-    private String prefixReq ;
+    private String prefixReq;
 
-    private long day ;
+    private long day;
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
     @PostConstruct
     public void init() throws Exception {
-        prefixReq = properties.getRedisKey() == null ? "reqNo" : properties.getRedisKey() ;
-        day = properties.getRedisTimeout() == null ? 1L : properties.getRedisTimeout() ;
+        prefixReq = properties.getRedisKey() == null ? "reqNo" : properties.getRedisKey();
+        day = properties.getRedisTimeout() == null ? 1L : properties.getRedisTimeout();
         logger.info("sbc-request-check init......");
         logger.info(String.format("redis prefix is [%s],timeout is [%s]", prefixReq, day));
     }
@@ -58,30 +62,30 @@ public class ReqNoDrcAspect {
      * 切面该注解
      */
     @Pointcut("@annotation(com.crossoverJie.request.check.anotation.CheckReqNo)")
-    public void checkRepeat(){
+    public void checkRepeat() {
     }
 
     @Before("checkRepeat()")
     public void before(JoinPoint joinPoint) throws Exception {
         BaseRequest request = getBaseRequest(joinPoint);
-        if(request != null){
+        if (request != null) {
             final String reqNo = request.getReqNo();
-            if(StringUtil.isEmpty(reqNo)){
+            if (StringUtil.isEmpty(reqNo)) {
                 throw new SBCException(StatusEnum.REPEAT_REQUEST);
-            }else{
+            } else {
                 try {
-                    String tempReqNo = redisTemplate.opsForValue().get(prefixReq +reqNo);
+                    String tempReqNo = redisTemplate.opsForValue().get(prefixReq + reqNo);
                     logger.debug("tempReqNo=" + tempReqNo);
 
-                    if((StringUtil.isEmpty(tempReqNo))){
+                    if ((StringUtil.isEmpty(tempReqNo))) {
                         redisTemplate.opsForValue().set(prefixReq + reqNo, reqNo, day, TimeUnit.DAYS);
-                    }else{
-                        throw new SBCException("请求号重复,"+ prefixReq +"=" + reqNo);
+                    } else {
+                        throw new SBCException("请求号重复," + prefixReq + "=" + reqNo);
                     }
 
-                } catch (RedisConnectionFailureException e){
-                    logger.error("redis操作异常",e);
-                    throw new SBCException("need redisService") ;
+                } catch (RedisConnectionFailureException e) {
+                    logger.error("redis操作异常", e);
+                    throw new SBCException("need redisService");
                 }
             }
         }
@@ -89,11 +93,10 @@ public class ReqNoDrcAspect {
     }
 
 
-
     public static BaseRequest getBaseRequest(JoinPoint joinPoint) throws Exception {
         BaseRequest returnRequest = null;
         Object[] arguments = joinPoint.getArgs();
-        if(arguments != null && arguments.length > 0){
+        if (arguments != null && arguments.length > 0) {
             returnRequest = (BaseRequest) arguments[0];
         }
         return returnRequest;
